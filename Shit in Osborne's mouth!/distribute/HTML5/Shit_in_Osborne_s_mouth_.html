@@ -1,0 +1,237 @@
+﻿<!doctype html>
+<html lang="en-us">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Emscripten-Generated Code</title>
+	<style>
+		canvas
+		{
+			-webkit-touch-callout: none; /* prevent callout to copy image, etc when tap to hold */
+			-webkit-text-size-adjust: none; /* prevent webkit from resizing text to fit */
+			-webkit-user-select: none; /* prevent copy paste, to allow, change 'none' to 'text' */
+			-webkit-tap-highlight-color: rgba(0,0,0,0); /* make transparent link selection, adjust last value opacity 0 to 1.0 */
+		}
+		.emscripten
+		{
+			padding-right: 0;
+			margin-left: auto;
+			margin-right: auto;
+			display: block;
+		}
+		textarea.emscripten
+		{
+			font-family: monospace;
+			width: 80%;
+		}
+		div.emscripten
+		{
+			text-align: center;
+		}
+		div.emscripten_border
+		{
+			border: 1px solid black;
+		}
+		/* the canvas *must not* have any border or padding, or mouse coords will be wrong */canvas.emscripten
+		{
+			border: 0px none;
+		}
+		.tabbar_space
+		{
+			width: 100%;
+			height: 21mm;
+			display: block;
+		}
+		.tabbar
+		{
+			width: 100%;
+			height: 21mm;
+			border-top: 1mm solid #225588;
+			color: white;
+			margin: 0px 0px 0px 0px;
+			padding: 2mm 2mm 2mm 2mm;
+			position: fixed;
+			left: 0px;
+			bottom: 0px;
+		}
+		.inputbox
+		{
+			font-size: 1.1em;
+			width: 6em;
+		}
+		.comment
+		{
+			border-bottom: 1px solid grey;
+		}
+		.result
+		{
+			color: blue;
+			float: right;
+		}
+		/* gradient background */.tabbar
+		{
+			/* IE10 Consumer Preview */
+			background-image: -ms-linear-gradient(top, #B0FFF7 0%, #02367A 100%); /* Mozilla Firefox */
+			background-image: -moz-linear-gradient(top, #B0FFF7 0%, #02367A 100%); /* Opera */
+			background-image: -o-linear-gradient(top, #B0FFF7 0%, #02367A 100%); /* Webkit (Safari/Chrome 10) */
+			background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #B0FFF7), color-stop(1, #02367A)); /* Webkit (Chrome 11+) */
+			background-image: -webkit-linear-gradient(top, #B0FFF7 0%, #02367A 100%); /* W3C Markup, IE10 Release Preview */
+			background-image: linear-gradient(to bottom, #B0FFF7 0%, #02367A 100%);
+		}
+		/* gradient button */.tabbutton
+		{
+			-moz-box-shadow: inset 0px 0.2mm 0px 0px #bee2f9;
+			-webkit-box-shadow: inset 0px 0.2mm 0px 0px #bee2f9;
+			box-shadow: inset 0px 0.2mm 0px 0px #bee2f9;
+			background: -webkit-gradient( linear, left top, left bottom, color-stop(0.05, #63b8ee), color-stop(1, #468ccf) );
+			background: -moz-linear-gradient( center top, #63b8ee 5%, #468ccf 100% );
+			filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#63b8ee', endColorstr='#468ccf');
+			background-color: #63b8ee;
+			-moz-border-radius: 2mm;
+			-webkit-border-radius: 2mm;
+			border-radius: 2mm;
+			border: 1px solid #3866a3;
+			display: inline-block;
+			color: #14396a;
+			font-family: arial;
+			font-size: 10mm;
+			font-weight: bold;
+			padding: 0.5mm 0.5mm;
+			height: 20mm;
+			width: 40mm;
+			text-decoration: none;
+			text-shadow: 0.2mm 0.2mm 0px #7cacde;
+			overflow: hidden;
+		}
+		.tabbutton:hover
+		{
+			background: -webkit-gradient( linear, left top, left bottom, color-stop(0.05, #468ccf), color-stop(1, #63b8ee) );
+			background: -moz-linear-gradient( center top, #468ccf 5%, #63b8ee 100% );
+			filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#468ccf', endColorstr='#63b8ee');
+			background-color: #468ccf;
+		}
+		.tabbutton:active
+		{
+			position: relative;
+			top: 1mm;
+		}
+	</style>
+</head>
+<body>
+	<div class="game" id="glb_game">
+		<div class="emscripten_border">
+			<!-- onclick to tell ios it's "clickable" -->
+			<canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" onclick="void(0)" ></canvas>
+		</div>
+	</div>
+	<div class="output" id="glb_output">
+		<h3>
+			Log</h3>
+		<div class="emscripten" id="status">
+			Downloading...</div>
+		<div class="emscripten">
+			<progress value="0" max="100" id="progress" hidden="1"></progress>
+		</div>
+		<hr />
+		<textarea class="emscripten" id="textoutput" rows="8"></textarea>
+	</div>
+	<div class="output" id="glb_options">
+		<h3>
+			Options</h3>
+		<form name="inputform" method="post" action="#">
+		<div class="inputboxes" id="inputboxes">
+			<div>
+				<input type="checkbox" id="resize">Resize canvas<br />
+				<input type="checkbox" id="pointerLock" >Lock/hide mouse pointer<br /> <!-- on iOS you get no mouse with this checked -->
+				<input type="button" value="Fullscreen" onclick="Module.requestFullScreen(document.getElementById('pointerLock').checked, 
+											document.getElementById('resize').checked); set_tab_page(0);">
+			</div>
+		</div>
+		</form>
+		<p>
+			created with <a href="http://www.glbasic.com">GLBasic</a>.
+		</p>
+	</div>
+	<div class="tabbar_space">
+		&nbsp;</div>
+	<script type='text/javascript'>
+		function set_tab_page(ipage)
+		{
+			document.getElementById('glb_game').style.display = (ipage == 0 ? 'block' : 'none');
+			document.getElementById('glb_output').style.display = (ipage == 1 ? 'block' : 'none');
+			document.getElementById('glb_options').style.display = (ipage == 2 ? 'block' : 'none');
+		}
+		window.onload = function () { set_tab_page(1); } // start tab = text (until all loading is done) see below.
+</script>
+	<div class="tabbar">
+		<input class="tabbutton" type="button" value="GO" title="Screen" onclick="set_tab_page(0);" />
+		<input class="tabbutton" type="button" value="..!" title="Console" onclick="set_tab_page(1);" />
+		<input class="tabbutton" type="button" value="..?" title="Options" onclick="set_tab_page(2);" />
+	</div>
+	<script type='text/javascript'>
+		// connect to canvas
+		var Module = {
+			preRun: [],
+			postRun: [],
+			print: (function ()
+			{
+				var element = document.getElementById('textoutput');
+				element.value = ''; // clear browser cache
+				return function (text)
+				{
+					text = Array.prototype.slice.call(arguments).join(' ');
+					// These replacements are necessary if you render to raw HTML
+					//text = text.replace(/&/g, "&amp;");
+					//text = text.replace(/</g, "&lt;");
+					//text = text.replace(/>/g, "&gt;");
+					//text = text.replace('\n', '<br>', 'g');
+					element.value += text + "\n";
+					element.scrollTop = 99999; // focus on bottom
+				};
+			})(),
+			printErr: function (text)
+			{
+				text = Array.prototype.slice.call(arguments).join(' ');
+				if (0)
+				{ // XXX disabled for safety typeof dump == 'function') {
+					dump(text + '\n'); // fast, straight to the real console
+				} else
+				{
+					console.log(text);
+				}
+			},
+			canvas: document.getElementById('canvas'),
+			setStatus: function (text)
+			{
+				if (Module.setStatus.interval) clearInterval(Module.setStatus.interval);
+				var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+				var statusElement = document.getElementById('status');
+				var progressElement = document.getElementById('progress');
+				if (m)
+				{
+					text = m[1];
+					progressElement.value = parseInt(m[2]) * 100;
+					progressElement.max = parseInt(m[4]) * 100;
+					progressElement.hidden = false;
+				} else
+				{
+					progressElement.value = null;
+					progressElement.max = null;
+					progressElement.hidden = true;
+					set_tab_page(0); // view game
+				}
+				statusElement.innerHTML = text;
+			},
+			totalDependencies: 0,
+			monitorRunDependencies: function (left)
+			{
+				this.totalDependencies = Math.max(this.totalDependencies, left);
+				Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies - left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
+			}
+		};
+		Module.setStatus('Downloading...');
+</script>
+	<!-- GLBasic code comes here: -->
+	<script async type="text/javascript" src="Shit_in_Osborne_s_mouth_.js"></script>
+</body>
+</html>

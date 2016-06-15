@@ -1,0 +1,300 @@
+// --------------------------------- //
+// Project: Shit in Osborne's mouth!
+// Start: Monday, April 04, 2016
+// IDE Version: 14.106
+
+
+TYPE tCunt
+	x
+	y
+	sourceSizeX
+	sourceSizeY
+	TargetSizeX
+	TargetSizeY
+	xs
+	ys
+	mouthSpeed
+	mouthY
+	mouthMax
+	FUNCTION init:sprite//FxS,FyS
+		//LOCAL xs,ys
+//		self.x=x
+//		self.y=y
+
+		GETSPRITESIZE sprite,self.sourceSizeX,self.sourceSizeY
+//		STARTPOLY
+//			POLYVECTOR x+FxS,y    ,0 ,xs,0xffffff    //0
+//			POLYVECTOR x    ,y    ,0 ,0 ,0xffffff	//1
+//			POLYVECTOR x    ,y+FyS,0 ,ys,0xffffff	//2
+//			POLYVECTOR x+FxS,y+FyS,xs,ys,0xffffff
+//		ENDPOLY
+	ENDFUNCTION
+
+	FUNCTION plot:x,y,scale
+
+		LOCAL xs=500*scale
+		LOCAL ys=695*scale//xs*1.39
+		LOCAL tsx=500//self.sourceSizeX
+		LOCAL tsy=695//self.sourceSizeY
+
+
+
+		STARTPOLY tempFaceSPR
+			POLYVECTOR x+xs,y   ,  tsx,0  ,0xffffff    //0    1   0
+			POLYVECTOR x   ,y   ,  0  ,0  ,0xffffff	//1
+			POLYVECTOR x   ,y+ys,  0  ,tsy,0xffffff	//2		  2   3
+			POLYVECTOR x+xs,y+ys,  tsx,tsy,0xffffff
+		ENDPOLY
+//		circle (250*scale,240*scale,150*scale,20,0xff0000,0)
+//		circle (250*scale,240*scale,150*scale,20,0xffffff,0)
+//		circle (250*scale,350*scale,150*scale,20,0xffffff,0)
+//		Box(240*scale,384*scale,70*scale,yi*scale,0x0000ff,0,0)
+//		Box(230*scale,(384+yi)*scale,100*scale,100*scale,0xffffff,0,0)
+
+
+
+	ENDFUNCTION
+ENDTYPE
+
+
+TYPE tVec
+	x
+	y
+
+ENDTYPE
+
+
+//**************************************************
+
+
+
+TYPE tGun
+	x
+	y
+	a
+	p
+
+
+	FUNCTION init:x,y
+		self.p=8
+		self.a=227
+	ENDFUNCTION
+
+	FUNCTION plot:
+		NewOSDebug("self.p "+self.p)
+		LOCAL l=30
+		DRAWLINE self.x,self.y,self.x+COS(self.a)*l,self.y+SIN(self.a)*l,0xffffff
+//		LOCAL cnt,x,y,xv,yv
+//		xv=COS(self.a)*self.p
+//		yv=SIN(self.a)*self.p
+//		x=self.x
+//		y=self.y
+//		REPEAT
+//			INC x,xv
+//			INC y,yv
+//			SETPIXEL x,y,0xffffff
+//			INC yv,gravity
+//			INC cnt
+//			//IF boxcol(target[0].x
+//		UNTIL x<0 OR y>Game.ScreenX
+	ENDFUNCTION
+
+	FUNCTION control:
+		IF KEY(200) THEN INC self.a
+		IF KEY(208) THEN DEC self.a
+		IF KEY(13) THEN INC self.p,0.05
+		IF KEY(12) THEN DEC self.p,0.05
+	ENDFUNCTION
+
+	FUNCTION run:
+	ENDFUNCTION
+
+
+
+ENDTYPE
+
+//**************************************************
+
+TYPE tShit
+x
+y
+num
+shits[] AS tVec
+
+
+	FUNCTION init:x,y,num,spread
+	DEBUG "\nMaking shits"
+		DIM self.shits[num]
+		FOR f=0 TO BOUNDS(self.shits[],0)-1
+			self.shits[f].x=x-(spread/2)+RND(spread)
+			self.shits[f].y=y-(spread/2)+RND(spread)
+		//	circle(self.x,self.y,5,10,RGB(0x80, 0x40, 0x40),0)
+		NEXT
+//		SHOWSCREEN
+//		MOUSEWAIT
+	ENDFUNCTION
+
+	FUNCTION plot:
+		FOR f=0 TO BOUNDS(self.shits[],0)-1
+		DRAWSPRITE shitSPR,self.shits[f].x,self.shits[f].y
+			//circle(self.shits[f].x,self.shits[f].y,5,10,RGB(0x80, 0x40, 0x40),0)
+		NEXT
+	ENDFUNCTION
+
+	FUNCTION move:
+	ENDFUNCTION
+
+ENDTYPE
+
+TYPE tMissile
+	x
+	y
+	xv
+	yv
+	status
+	angle
+	FUNCTION fire:
+		self.x=gun.x
+		self.y=gun.y
+		self.xv=COS(gun.a)*gun.p
+		self.yv=SIN(gun.a)*gun.p
+		self.status=1
+		self.angle=0
+		//		self.p=8
+		DEBUG "firing from  "+gun.x+" "+gun.y
+//		firetimer=GETTIMERALL()+500
+
+	ENDFUNCTION
+
+	FUNCTION plot:
+		//STATIC a
+		INC self.angle,gun.p
+		IF self.angle>360 THEN self.angle =0
+//		DRAWSPRITE shitSPR,self.x,self.y
+		ROTOZOOMSPRITE turdSPR,self.x-64,self.y-64,self.angle,0.25
+
+
+//		LOCAL sx,sy
+//		GETSPRITESIZE turdSPR,sx,sy
+//		DEBUG "\n"+sx+" "+sy
+//		END
+
+
+	//	DRAWSPRITE turdSPR,self.x,self.y
+//	circle(self.x,self.y,10,10,0xffffff,0)
+	ENDFUNCTION
+
+	FUNCTION run:num
+		SELECT self.status
+			CASE 1
+				INC self.x,self.xv
+				INC self.y,self.yv
+				INC self.yv,gravity
+			CASE 2
+				INC self.y,5
+		ENDSELECT
+
+		IF self.x<0 OR self.y>Game.ScreenY
+			DIMDEL missile[],num
+			RETURN
+		ENDIF
+
+
+	ENDFUNCTION
+
+
+
+ENDTYPE
+
+
+TYPE tEye
+	x
+	y
+	minx
+	maxx
+	miny
+	maxy
+	dir
+	speed
+	FUNCTION init:x,y,mxr,dir
+		self.dir=dir
+		self.x=x
+		self.y=y
+		self.minx=x-mxr
+		self.maxx=x+mxr
+		self.speed=0.1
+	ENDFUNCTION
+
+	FUNCTION LRmove:
+	NewOSDebug("dir="+self.dir)
+	NewOSDebug("x="+self.x)
+	NewOSDebug("min/max  "+self.minx+"  "+self.maxx)
+		LOCAL ox,oy
+		ox=self.x
+		oy=self.y
+		IF self.dir=0
+			INC self.x,self.speed
+			IF self.x>self.maxx
+				self.dir=bXOR(self.dir,1)
+				self.x=self.maxx-1
+				//self.y=oy
+				RETURN
+			ENDIF
+		ELSE
+			DEC self.x,self.speed
+			IF self.x<self.minx
+				self.dir=bXOR(self.dir,1)
+				self.x=self.minx+1//ox
+			//	self.y=oy
+				RETURN
+			ENDIF
+		ENDIF
+	ENDFUNCTION
+
+	FUNCTION plot:
+
+		DRAWSPRITE eyeSPR,self.x*scale,self.y*scale
+	ENDFUNCTION
+
+
+
+	FUNCTION lookAt:x,y,ex,ey
+		LOCAL a,rad,fx,fy
+
+		rad=5
+		a=get2dAng(ex*scale,ey*scale,x,y)
+
+		fx=ex+COS(a)*rad
+		fy=ey+SIN(a)*rad
+	//	DRAWSPRITE eyeSPR,fx,fy
+		self.x=fx
+		self.y=fy
+	ENDFUNCTION
+ENDTYPE
+
+TYPE tTarget
+	kind
+	x
+	y
+	xs
+	ys
+	rad
+	FUNCTION init:kind,x,y,xs,ys,rad
+		self.kind=kind
+		self.x=x
+		self.y=y
+		self.xs=xs
+		self.ys=ys
+		self.rad=rad
+	ENDFUNCTION
+
+	FUNCTION plot:
+		SELECT self.kind
+			CASE 0
+				circle (self.x,self.y,self.rad,20,0xff00ff,0)
+			CASE 1
+				Box(self.x,self.y,self.xs,self.ys,0xff00ff,0,0)
+		ENDSELECT
+	ENDFUNCTION
+
+ENDTYPE

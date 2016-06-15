@@ -1,0 +1,641 @@
+// --------------------------------- //
+// Project: jetpac
+// Start: Sunday, June 28, 2015
+// IDE Version: 12.308
+//
+//
+// FREE-VERSION:
+// Need Premium for Features:
+// 3D Graphics
+// Network Commands
+// INLINE C/C+++ code
+//CONSTANT meteor=1
+//CONSTANT bonus=2
+//CONSTANT fuel=3
+//CONSTANT Wall=1
+//CONSTANT Flr=2
+//CONSTANT HighWall=3
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//CONSTANT EnemySpikeyTargetted=1
+//CONSTANT EnemySpikeyRandom=2
+//
+//CONSTANT EnemyPathTypeInit=3
+//CONSTANT EnemyPathType=4
+//
+//
+//
+//
+//
+//CONSTANT Spikey=1
+//CONSTANT Slope=4
+//
+//CONSTANT Ice=6
+//
+//TYPE tSpawnpoint
+//	x
+//	y
+//	z
+//	ScreenX
+//	ScreenY
+//	ScreenZ
+//	angle
+//	Live
+//ENDTYPE
+//
+//GLOBAL SpawnPoint[] AS tSpawnpoint
+//
+//
+//
+//TYPE tAng
+//	xv#
+//	yv#
+//ENDTYPE
+//
+//
+//GLOBAL Ang[] AS tAng
+//
+//
+//
+// AS tAng
+//
+//TYPE tSpawnpoint
+//x
+//y
+//z
+//angle
+//
+//ENDTYPE
+//GLOBAL SpawnPoint AS tSpawnpoint
+//
+//
+//TYPE tBall
+//	x#=400//,1500
+//	y#=1500//720/2
+//	z#=0
+//	xv#
+//	yv#
+//	axv#
+//	ayv#
+//	ox#
+//	oy#
+//	mag#
+//	sprite
+//	lastAnim
+//	AnimCount
+//	WorldX
+//	WorldY
+//	shadow
+//	ScreenXPos
+//	ScreenYPos
+//	MapX
+//	MapY
+//	CollDiv=8
+//	FullShadow
+//	friction
+//ENDTYPE
+//
+//GLOBAL  Ball AS tBall
+//
+TYPE tGame
+ 	ScreenX
+ 	ScreenY
+ 	dev$
+ 	Score
+ENDTYPE
+//
+GLOBAL Game AS tGame
+//
+//
+//
+//TYPE tLaser
+//	x
+//	y
+//	dir
+//	timer
+//ENDTYPE
+//
+//TYPE tMapStructure
+//	tMapHeader
+//	tMapData[10002089]
+//EN/DTYPE
+//
+//
+//TYPE tMapHeader
+//	Name
+//	width
+//	height
+//ENDTYPE
+//
+//TYPE tMapData
+//	x
+//	y
+//	info
+//	image
+//	height
+//	shadow
+//	friction#
+//ENDTYPE
+//
+//
+//
+//
+//TYPE tTile
+//	num
+//	x
+//	y
+//	xs
+//	ys
+//ENDTYPE
+//
+//GLOBAL Tile[]
+//
+//
+//TYPE tGame
+//	FireDelay
+// RocketCount//=1
+// SourceSx#
+// SourceSy#
+// ScreenX
+// ScreenY
+// pi$
+// tSx#
+// tSy#
+// yRatio
+// xRatio
+// animCount#
+// animCount2
+//
+// Font8
+// Font16
+// Font32
+// Font64
+// CurrentFont
+// mx
+// my
+// b1
+// b2
+// controltype
+// buttonCount=1
+// Fcount=0
+// TargetSx
+// TargetSy
+// power=200
+// Status//=1    //1=building rocket         2=rocket complete
+// Mode//=2
+// Score
+// bonustimer
+// Fuel
+// BallSprite
+// TempScreen
+//worldX
+//worldY
+//fireTimer
+//Controls
+//ENDTYPE
+//
+//
+//
+//status  	1=build rocket
+//			2=fuel rocket
+//			3=Blast off
+//
+//GLOBAL  Game AS tGame
+//
+//TYPE tdude
+//	x#=400
+//	y#=200
+//	xv
+//	yv
+//	mode
+//	wl
+//	wr
+//	fl
+//	fr
+//	ox#
+//	oy#
+//	xs=64
+//	ys=100
+//	AutoFire
+//	carrying
+//ENDTYPE
+//
+//GLOBAL dude AS tdude
+//
+//
+//GLOBAL temp
+//GLOBAL tempspt
+//
+//
+//
+//
+//
+//TYPE tButton
+//	num
+//	func$
+//	x
+//	y
+//	xs
+//	ys
+//ENDTYPE
+//
+//
+//TYPE  tColbox
+//	x
+//	y
+//	xs
+//	ys
+//	img
+//ENDTYPE
+//
+//TYPE tRoute
+//	x;z
+//ENDTYPE
+//GLOBAL  Route[] AS tRoute
+//
+//
+//
+//
+//
+//TYPE tEnemy
+//	x
+//	y
+//	z
+//	xv
+//	yv
+//	zv
+//	kind
+//	path[] AS tRoute
+//	ScreenX
+//	ScreenY
+//	ScreenZ
+//	timer
+//	status
+//	PathNavTime
+//	PathNavTimer
+//
+// 	PathIndex
+//	MaxPath
+//
+//
+//
+//FUNCTION RunEntity:
+//	STATIC a
+//	LOCAL x,y,z
+//	INC a,5
+//	NewOSDebug("Enemy path index "+self.PathIndex)
+//		SELECT  self.kind
+//			CASE EnemySpikeyRandom
+//				INC self.x,self.xv
+//				INC self.z,self.zv
+//				X_MOVEMENT self.x,1,self.z
+//				X_SETTEXTURE TexRed,-1
+//				X_ROTATION a,1,1,1
+//				X_DRAWOBJ SpikeyIMG,0
+//
+//			CASE EnemySpikeyTargetted
+//				INC self.x,self.xv
+//				INC self.z,self.zv
+//				X_MOVEMENT self.x,1,self.z
+//				X_SETTEXTURE TexGreen,-1
+//				X_ROTATION a,1,1,1
+//				X_DRAWOBJ SpikeyIMG,0
+//
+//
+//
+//
+//
+//			CASE EnemyPathTypeInit
+//				DEBUG "\n										Init Path"
+//				self.PathIndex=0
+//				self.kind=EnemyPathType
+//
+//			CASE EnemyPathType
+//				IF GETTIMERALL()>self.PathNavTime
+//               		LOCAL x=self.path[self.PathIndex].x
+//					LOCAL z=self.path[self.PathIndex].z
+//					IF x>0 THEN self.x=x
+//					IF z>0 THEN self.z=z
+//					INC self.PathIndex
+//	  				self.y=1
+//					self.PathNavTimer=GETTIMERALL()+self.PathNavTime
+//  					IF self.PathIndex>self.MaxPath-1
+//  						DEBUG "\ngot to end"
+//  						END
+//  						RETURN -1//DELETE self[]
+//  					ENDIF
+//				ENDIF
+//				X_MOVEMENT self.x,1,self.z
+//				X_SETTEXTURE TexYel,-1
+//				X_DRAWOBJ SpikeyIMG,0
+//
+//		ENDSELECT
+//		X_WORLD2SCREEN self.x,self.y,self.z ,self.ScreenX,self.ScreenY,self.ScreenZ
+//		IF self.kind=EnemyPathType
+//
+//			X_MAKE2D
+//				DRAWLINE  self.ScreenX,self.ScreenY,self.ScreenZ,pl.sx,pl.sy
+//			X_MAKE3D cam.Near,cam.Far,cam.FOV
+//			X_CAMERA pl.x,50,pl.z,pl.x,0,pl.z-.0001
+//			X_LINE self.x,2,self.z ,pl.x,2,pl.z,2,0xffffff
+//			LOCAL a,b,d
+//			a=get2dAng(self.x,self.z,pl.x,pl.z)
+//			a=180
+//
+//			d=get2dDist(self.x,self.z,pl.x,pl.z)
+//			b=0
+//			b=X_COLLISIONRAY(deathbot,0, self.x,1,self.z   ,self.x+(COS(a)),1,self.z+(SIN(a)))
+//			DEBUG "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"//\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+//			DEBUG "\n  dist "+d
+//			DEBUG "\n   Ang "+a
+//			DEBUG "\n3ddist "+b
+//
+//			X_LINE 						 self.x,2,self.z   ,self.x+(COS(a)*10),2,self.z+(SIN(a)*10),3,RGB(0xff, 0x80, 0x00)
+//		ENDIF
+//
+//
+//
+//ENDFUNCTION // PLOTENEMY
+//
+//FUNCTION MakeEntity: x,y,z,xv,yv,zv,xs%,ys%,kind,spawnPnt
+//
+//DIMPUSH enemy[].yv#,yv#
+//			self.x=x
+//			self.y=y
+//			self.z=z
+//			self.NextPathX=x
+//			self.NextPathY=y
+//			self.NextPathZ=z
+//			self.kind=kind
+//
+//
+//	SELECT  kind
+//		CASE EnemySpikeyRandom   //spikey
+//			self.xv=xv
+//			self.yv=yv
+//			self.zv=zv
+//			self.status=1
+//			self.timer=0
+//
+//		CASE EnemySpikeyTargetted   //spikey
+//			self.xv=xv
+//			self.yv=yv
+//			self.zv=zv
+//			self.status=1
+//			self.timer=0
+//
+//
+//		CASE EnemyPathTypeInit  //path type
+//			self.MaxPath=FindThePath(SpawnPoint[spawnPnt].x,SpawnPoint[spawnPnt].z,pl.x,pl.z,self.path[])
+//			self.PathNavTime=100
+//			DEBUG "\nMax Path "+self.MaxPath
+//			END
+//	ENDSELECT
+//
+//	FOR q=0 TO BOUNDS(self.path[],0)-2
+//		DEBUG "\nposition "+q+"  x="+self.path[q].x+"   z="+self.path[q].z
+//		DEBUG "\n z="+self.path[q][1]
+//	NEXT
+//	END
+//
+//ENDFUNCTION // MAKEENEMY
+//
+//
+//ENDTYPE
+//
+//
+//TYPE tParticle
+//	x
+//	y
+//	z
+//	xv
+//	yv
+//	zv
+//	ScreenX
+//	ScreenY
+//	ScreenZ
+//	angle
+//	speed
+//	ttl
+//	RotSpeed
+//	Rot
+//	gravity
+//	gfx
+//	kind
+//ENDTYPE
+//
+//TYPE tObject
+//	status
+//	image
+//	x
+//	y
+//	targetx
+//	targety
+//	targetsx
+//	targetsy
+//	dropy
+//	que
+//ENDTYPE
+//
+//TYPE tMap
+//	def
+//	x
+//	y
+//ENDTYPE
+//
+//TYPE tHighS
+//	Score
+//	Name$
+//
+//ENDTYPE
+//
+//GLOBAL Object[] AS tObject
+//GLOBAL OneObject AS tObject
+//
+//
+//
+//
+//GLOBAL Button[] AS tButton
+//GLOBAL OneButton AS tButton
+//
+//
+//GLOBAL OS//debug$[]
+//GLOBAL ColBox[] AS tColbox
+//GLOBAL OneEnemy AS tEnemy
+//GLOBAL Enemy[] AS tEnemy
+//
+//GLOBAL OneLaser AS tLaser
+//GLOBAL Laser[] AS tLaser
+//
+//
+GLOBAL OSDebug$[]
+//GLOBAL ColBoxCount=0
+//
+//GLOBAL OneParticle AS tParticle
+//GLOBAL Particle[] AS tParticle
+//GLOBAL Map[] AS tMap
+//
+//GLOBAL OneMap AS tMap
+//
+//GLOBAL HighScore[] AS tHighS
+//GLOBAL SingleScore AS tHighS
+//
+//
+//
+//GLOBAL Particle[] AS tparticle
+//
+//
+//TYPE tFps
+//dtime#
+//Fps#
+//Min#
+//Max#
+//Avg#
+//ENDTYPE
+//
+//DIM Fps AS tFps
+//
+//
+//TYPE tpl
+//x
+//y
+//z
+//sx
+//sy
+//sz
+//ox
+//oy
+//oz
+//xv
+//zv
+//yv
+//
+//xStep
+//yStep
+//zStep
+//ENDTYPE
+//GLOBAL pl AS tpl
+//
+//
+//TYPE tCam
+//	x
+//	y
+//	z
+//	Near
+//	Far
+//	FOV//1,60,45
+//ENDTYPE
+//GLOBAL cam AS tCam
+//
+//TYPE tScroller
+//	x
+//	y
+//	DispXSize
+//	DispYSize
+//	CamX
+//	CamY
+//	CamZ
+//	ScrollX
+//	ScrollY
+//	xPos
+//	yPos
+//ENDTYPE
+//
+//GLOBAL scroll AS tScroller
+//
+//
+//GLOBAL  PathMap[]
+//
+//
+//
+//
+//
+//
+//
+// ------------------------------------------------------------- //
+// ---  SETUP  ---`---------------------------------------- //
+FUNCTION setup:
+//
+//
+//pl.x=2//5.5
+//pl.y=0
+//pl.z=3//2.5
+
+
+	GETSCREENSIZE Game.ScreenX,Game.ScreenY
+//	scroll.x=0
+//	scroll.y=0
+//	scroll.DispXSize=34
+//	scroll.DispYSize=20
+//	scroll.CamX=scroll.DispXSize/2
+//	scroll.CamY=20
+//	scroll.CamZ=scroll.DispYSize/2
+//
+//
+//	cam.Near=1
+//	cam.Far=60
+//	cam.FOV=45//1,60,45
+//
+//
+
+
+//	Game.pi$=PLATFORMINFO$("DEVICE")
+// 	Game.temp=GENSCREEN()
+//	Game.tempspt=GENSPRITE()
+//	DIM Button[10]
+	DIM OSDebug$[200]
+//	DIM ColBox[40*40]
+//	DIM Enemy[0] //AS tEnemy
+//	dude.xs%=40
+//	dude.ys%=79
+//	DIM Laser[0]
+//	DIM Particle[0]
+//	DIM Button[0]
+//	DIM Object[0]
+//	DIM Map[0]
+
+
+//	0 = Display only
+//	1 = interactable
+//	2 = pickedup
+//	3 = dropping
+//	4 = housed
+//	Game.RocketCount=1
+//	Game.Status=1
+//	Game.Mode=2
+//	Game.Score=0
+//	Game.power=4
+//	Game.Fuel=0
+//
+//	Game.TempScreen=GENSCREEN()
+// 	Game.BallSprite=GENSPRITE()
+//
+//
+//	dude.x#=DudeStartX
+//	dude.y#=DudeStartY
+//	dude.xv=0
+//	dude.yv=0
+//	dude.carrying=0
+//
+//	dude.AutoFire=1
+
+
+//	Game.Status=2
+//
+//
+//	Ball.ScreenXPos=Game.ScreenX/2
+//	Ball.ScreenYPos=Game.ScreenY/2
+//	DIM Ang[32]
+//
+
+ENDFUNCTION // SETUP
+
+
+

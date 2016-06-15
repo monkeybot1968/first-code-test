@@ -1,0 +1,340 @@
+
+
+//TEST ING 1
+
+
+
+
+
+
+// ------------------------------- //
+// Project: Shit in Osborne's mouth!
+// Start: Monday, April 04, 2016
+// IDE Version: 14.106
+
+//LOCAL r,g,b
+//r=NormaliseScale(0,100,1)
+//g=NormaliseScale(0,255,.5)
+//b=NormaliseScale(0,255,.5)
+//
+//
+//DEBUG "\n"+r+" "+g+" "+b
+//
+//DRAWRECT 100,100,100,100,RGB(r,g,b)
+//SHOWSCREEN
+//KEYWAIT
+//
+
+
+
+	SYSTEMPOINTER 1
+//	SETSCREEN 1920/2,1080/2,0
+ 	SETCURRENTDIR("Media") // go to media files
+ 	DEBUG "\n"+GETCURRENTDIR$()
+ 	//END
+
+	GLOBAL  scale =.5
+ 	setup()
+	LIMITFPS 50
+
+ 	GLOBAL fontSheet
+	fontSheet=LoadTheSprite("font 32x32 .png")//"hyptosis_tile-art-batch-1.png")//
+
+	LOCAL sx,sy
+	GETSPRITESIZE fontSheet,sx,sy
+	GLOBAL  pix%[]
+	DIM pix[sx*sy]
+	SPRITE2MEM(pix[],fontSheet)
+
+	GLOBAL PolyChar[] AS tPolyChar
+
+	SetupFont(sx,sy)
+
+
+	CONSTANT gravity =0.08
+	GLOBAL firetimer
+
+
+	GLOBAL gun AS tGun
+	gun.x=Game.ScreenX * 0.9
+	gun.y=Game.ScreenY - 30
+	gun.a=220
+	gun.p=8
+
+
+
+	GLOBAL face
+	face=LoadTheSprite("face2.png")
+	GLOBAL mouth
+	mouth=LoadTheSprite("small mouth.png")
+	GLOBAL eyeSPR
+	eyeSPR=LoadTheSprite("eye.png")
+
+	GLOBAL turdSPR
+	turdSPR=LoadTheSprite("turd.png")
+
+
+	GLOBAL shit[] AS tShit
+	DIM shit[0]
+
+	GLOBAL osb[] AS tCunt
+	DIM osb[1]
+
+	GLOBAL tempFace
+	tempFace=GENSCREEN()
+	GLOBAL tempFaceSPR
+	tempFaceSPR=GENSPRITE()
+	CREATESCREEN tempFace,tempFaceSPR,500,695
+
+	GLOBAL target[] AS tTarget
+	DIM target[4]
+	target[0].init(0,250*scale,240*scale,0,0,150*scale)
+	target[1].init(0,250*scale,350*scale,0,0,150*scale)
+	osb[0].init(tempFaceSPR)//
+
+	GLOBAL shitSPR
+	shitSPR=GENSPRITE()
+	FIllcircle(10,10,5,0x404080,shitSPR)
+
+
+	GLOBAL redDotSPR
+	redDotSPR=GENSPRITE()
+	FIllcircle(10,10,5,0x0000ff,redDotSPR)
+
+	GLOBAL blueDotSPR
+	blueDotSPR=GENSPRITE()
+	FIllcircle(10,10,5,0xff0000,blueDotSPR)
+
+	GLOBAL greenDotSPR
+	greenDotSPR=GENSPRITE()
+	FIllcircle(10,10,5,0x00ff00,greenDotSPR)
+
+
+	GLOBAL eye[] AS tEye
+	DIM eye[2]
+
+
+	GLOBAL missile[] AS tMissile
+	DIM missile[0]
+
+	eye[0].init(418,496,30,1)//209,248,15,1)
+	eye[1].init(329*2,255*2,15*2,1)//329,255,15,1)
+
+	SETLOOPSUB "MainLoop"
+
+
+
+SUB MainLoop:
+//ALPHAMODE 0
+	STATIC yi,d
+	LOCAL mx,my,b1,b2,fx=-100,fy=-100,maxi=30,speed=.5
+
+//	REPEAT
+		MOUSESTATE mx,my,b1,b2
+		NewOSDebug("Score "+Game.Score)
+		NewOSDebug("gun "+gun.x+" "+gun.y)
+		NewOSDebug(GETTIMERALL())
+		USESCREEN tempFace
+		DRAWRECT 190,230,180,50,0xffffff
+//	eye[0].init(418,496,30,1)//209,248,15,1)
+//	eye[1].init(329*2,255*2,15*2,1)//329,255,15,1)
+
+			IF BOUNDS(missile[],0)>0
+				eye[0].lookAt(missile[0].x,missile[0].y,418,496)
+				eye[1].lookAt(missile[0].x,missile[0].y,329*2,255*2)
+			ELSE
+				eye[0].LRmove()
+				eye[1].LRmove()
+
+			ENDIF
+
+			eye[0].plot()
+			eye[1].plot()
+			DRAWSPRITE face,0,0//-100,-300
+			DRAWSPRITE mouth,230,380+yi
+		USESCREEN -1
+
+		target[2].init(1,240*scale,384*scale,70*scale,yi*scale,0)		//mouth
+		target[3].init(1,230*scale,(384+yi)*scale,100*scale,100*scale,0)//chin
+
+		IF d=0
+			INC yi,speed
+		ELSE
+			DEC yi,speed
+		ENDIF
+		IF yi<0 THEN d=0
+		IF yi>maxi THEN d=1
+//		IF b1
+//		LOCAL b
+//			b=BOUNDS(shit[],0)
+//			REDIM shit[b+1]
+//			shit[b].init(mx,my,10,20)
+//			SLEEP 200
+//		ENDIF
+//	//	DRAWSPRITE tempFaceSPR,-100,-300
+		osb[0].plot(00,00,scale)
+
+		FOR f=0 TO BOUNDS(shit[],0)-1
+		shit[f].plot()
+		NEXT
+
+		NewOSDebug("live shits "+BOUNDS(shit[],0))
+		gun.control()
+		gun.plot()
+//
+		NewOSDebug("Gun "+gun.p)
+//
+//
+		IF KEY(57) AND  GETTIMERALL()>firetimer
+
+			LOCAL b
+			b=BOUNDS(missile[],0)
+			REDIM missile[b+1]
+			missile[b].fire()
+			firetimer=GETTIMERALL()+500
+		ENDIF
+
+		FOR q=0 TO BOUNDS(missile[],0)-1
+			missile[q].plot()
+			missile[q].run(q)
+		NEXT
+
+
+
+		target[0].plot()	//top c
+		target[1].plot()	//bottom c
+		target[2].plot()	//mouth
+		target[3].plot()	//chin
+//
+//		IF BOUNDS(missile[],0)>0 THEN DRAWLINE eye[0].x*scale,eye[0].y*scale ,missile[0].x,missile[0].y,0x00ff00
+//
+//
+//
+		targetPath(yi,1)
+		LOCAL   avg
+
+		NewOSDebug("Frame Time "+GETTIMER())
+		NewOSDebug("Avg  "+avg)
+
+		PrintOSDebug(0,0)
+		IF BOUNDS(missile[],0)>0
+			DRAWLINE eye[0].x*scale,eye[0].y*scale,missile[0].x,missile[0].y,0xffffff
+		ENDIF
+		SHOWSCREEN
+//	UNTIL FALSE
+
+
+ENDSUB
+
+
+
+FUNCTION fireShit:
+
+ENDFUNCTION
+
+
+FUNCTION targetPath:yi,display
+
+LOCAL fadeout=100
+LOCAL cnt,x,y,xv,yv,col
+		xv=COS(gun.a)*gun.p
+		yv=SIN(gun.a)*gun.p
+		x=gun.x
+		y=gun.y
+
+
+		LOCAL xx,yy,xxs,yys
+		xx=100*scale
+		xxs=300*scale
+		yy=90*scale
+		yys=500*scale
+		Box(xx,yy,xxs,yys,0xffffff,0,0)
+		LOCAL counter,ox,oy,linecol=0xffffff,rr=255,gg=255,bb=255
+		REPEAT
+			ox=x
+			oy=y
+			INC x,xv
+			INC y,yv
+			INC yv,gravity
+
+				col=greenDotSPR
+//				INC x,xv
+//				INC y,yv
+//				INC yv,gravity
+
+				xx=100*scale
+				xxs=300*scale
+				yy=90*scale
+				yys=500*scale
+
+				IF (x >xx AND x<xx+xxs) AND (y>yy AND y<yy+yys)
+					col=blueDotSPR
+					IF display=0 THEN ZOOMSPRITE redDotSPR,x,y,.5,.5
+				ENDIF
+
+
+				xx=240*scale
+				xxs=70*scale
+				yy=384*scale
+				yys=yi*scale
+				IF (x >xx AND x<xx+xxs) AND (y>yy AND y<yy+yys)
+					INC cnt
+					col=redDotSPR
+					IF display=0 THEN  ZOOMSPRITE redDotSPR,x,y,.5,.5
+				ENDIF
+
+			IF display=1
+				ZOOMSPRITE col,x,y,.5,.5
+			ELSE
+				DRAWLINE x,y,ox,oy,RGB(rr,gg,bb)//linecol
+			ENDIF
+
+			//DEC linecol,0x111111/2
+			DEC rr,10
+			DEC gg,10
+			DEC bb,10
+
+
+
+
+
+
+
+
+		//	ZOOMSPRITE shitSPR,x,y,.5,.5
+//			SETPIXEL x,y,col
+			FOR q=0 TO BOUNDS(missile[],0)-1
+				SELECT missile[q].status
+					CASE 1
+						IF missile[q].x>xx AND missile[q].x<xx+xxs
+							IF missile[q].y>yy AND missile[q].y<yy+yys
+								INC Game.Score
+								missile[q].status=2
+								LOCAL b
+								b=BOUNDS(shit[],0)
+								REDIM shit[b+1]
+								shit[b].init(missile[q].x,missile[q].y,10,20)
+			//					DIMDEL missile[],q
+							ENDIF
+						ENDIF
+					CASE 2
+						IF missile[q].y>Game.ScreenY THEN DIMDEL missile[],q
+				ENDSELECT
+			NEXT
+
+		UNTIL x<0 OR y>Game.ScreenX OR (rr<0  AND display=0)
+
+		//240*scale,384*scale,70*scale,yi*scale
+
+
+	NewOSDebug("mouth targets "+cnt)
+ENDFUNCTION
+
+
+//
+//target[0].init(0,250*scale,240*scale,0,0,150*scale)
+//	target[1].init(0,250*scale,350*scale,0,0,150*scale)
+//
+
+
+
